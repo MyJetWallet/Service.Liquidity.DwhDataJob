@@ -5,13 +5,22 @@ namespace Service.Liquidity.DwhDataJob.Settings
 {
     public class SettingsModel
     {
-        [YamlProperty("Liquidity.DwhDataJob.SeqServiceUrl")]
+        [YamlProperty("LiquidityDwhDataJob.SeqServiceUrl")]
         public string SeqServiceUrl { get; set; }
 
-        [YamlProperty("Liquidity.DwhDataJob.ZipkinUrl")]
+        [YamlProperty("LiquidityDwhDataJob.ZipkinUrl")]
         public string ZipkinUrl { get; set; }
 
-        [YamlProperty("Liquidity.DwhDataJob.ElkLogs")]
+        [YamlProperty("LiquidityDwhDataJob.ElkLogs")]
         public LogElkSettings ElkLogs { get; set; }
+
+        [YamlProperty("LiquidityDwhDataJob.MyNoSqlReaderHostPort")]
+        public string MyNoSqlReaderHostPort { get; set; }
+
+        [YamlProperty("LiquidityDwhDataJob.MarketPriceJobTimerInSeconds")]
+        public int MarketPriceJobTimerInSeconds { get; set; }
+
+        [YamlProperty("LiquidityDwhDataJob.PostgresConnectionString")]
+        public string PostgresConnectionString { get; set; }
     }
 }

@@ -7,11 +7,13 @@ using Microsoft.Extensions.Hosting;
 using Autofac;
 using MyJetWallet.Sdk.GrpcMetrics;
 using MyJetWallet.Sdk.GrpcSchema;
+using MyJetWallet.Sdk.Postgres;
 using MyJetWallet.Sdk.Service;
 using Prometheus;
 using ProtoBuf.Grpc.Server;
 using Service.Liquidity.DwhDataJob.Grpc;
 using Service.Liquidity.DwhDataJob.Modules;
+using Service.Liquidity.DwhDataJob.Postgres;
 using Service.Liquidity.DwhDataJob.Services;
 using SimpleTrading.BaseMetrics;
 using SimpleTrading.ServiceStatusReporterConnector;
@@ -23,10 +25,10 @@ namespace Service.Liquidity.DwhDataJob
         public void ConfigureServices(IServiceCollection services)
         {
             services.BindCodeFirstGrpc();
-
             services.AddHostedService<ApplicationLifetimeManager>();
-
             services.AddMyTelemetry("SP-", Program.Settings.ZipkinUrl);
+            services.AddDatabase(DatabaseContext.Schema, Program.Settings.PostgresConnectionString, 
+                o => new DatabaseContext(o));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -61,6 +63,7 @@ namespace Service.Liquidity.DwhDataJob
         {
             builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<ServiceModule>();
+            builder.RegisterModule<ClientModule>();
         }
     }
 }
