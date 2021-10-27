@@ -12,6 +12,24 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                 name: "liquidity_dwhdata");
 
             migrationBuilder.CreateTable(
+                name: "balancedashboard",
+                schema: "liquidity_dwhdata",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UpdateDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    Asset = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    ClientBalance = table.Column<decimal>(type: "numeric", nullable: false),
+                    BrokerBalance = table.Column<decimal>(type: "numeric", nullable: false),
+                    Commission = table.Column<decimal>(type: "numeric", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_balancedashboard", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "convertprice",
                 schema: "liquidity_dwhdata",
                 columns: table => new
@@ -48,6 +66,13 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                 {
                     table.PrimaryKey("PK_marketprice", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_balancedashboard_Asset",
+                schema: "liquidity_dwhdata",
+                table: "balancedashboard",
+                column: "Asset",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_convertprice_BaseAsset_QuotedAsset",
@@ -96,6 +121,10 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "balancedashboard",
+                schema: "liquidity_dwhdata");
+
             migrationBuilder.DropTable(
                 name: "convertprice",
                 schema: "liquidity_dwhdata");

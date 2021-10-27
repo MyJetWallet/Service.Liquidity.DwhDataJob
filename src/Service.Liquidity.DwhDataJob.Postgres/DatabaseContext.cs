@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Service.Liquidity.DwhDataJob.Domain.Models;
 using Service.Liquidity.DwhDataJob.Postgres.Models;
 
 namespace Service.Liquidity.DwhDataJob.Postgres
@@ -12,9 +15,12 @@ namespace Service.Liquidity.DwhDataJob.Postgres
         
         private const string MarketPriceTableName = "marketprice";
         private const string ConvertIndexPriceTableName = "convertprice";
+        private const string BalanceDashboardTableName = "balancedashboard";
         
         private DbSet<MarketPriceEntity> MarketPriceCollection { get; set; }
         private DbSet<ConvertIndexPriceEntity> ConvertIndexPriceCollection { get; set; }
+        
+        private DbSet<BalanceDashboard> BalanceDashboardCollection { get; set; }
         
         public DatabaseContext(DbContextOptions options) : base(options)
         {
@@ -35,8 +41,25 @@ namespace Service.Liquidity.DwhDataJob.Postgres
 
             SetMarketPriceEntity(modelBuilder);
             SetConvertIndexPriceEntity(modelBuilder);
+            SetBalanceDashboardEntity(modelBuilder);
             
             base.OnModelCreating(modelBuilder);
+        }
+
+        private void SetBalanceDashboardEntity(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<BalanceDashboard>().ToTable(BalanceDashboardTableName);
+            
+            modelBuilder.Entity<BalanceDashboard>().Property(e => e.Id).UseIdentityColumn();
+            modelBuilder.Entity<BalanceDashboard>().HasKey(e => e.Id);
+            
+            modelBuilder.Entity<BalanceDashboard>().Property(e => e.Asset).HasMaxLength(64);
+            modelBuilder.Entity<BalanceDashboard>().Property(e => e.UpdateDate);
+            modelBuilder.Entity<BalanceDashboard>().Property(e => e.ClientBalance);
+            modelBuilder.Entity<BalanceDashboard>().Property(e => e.BrokerBalance);
+            modelBuilder.Entity<BalanceDashboard>().Property(e => e.Commission);
+            
+            modelBuilder.Entity<BalanceDashboard>().HasIndex(e => e.Asset).IsUnique();
         }
 
         private void SetConvertIndexPriceEntity(ModelBuilder modelBuilder)
@@ -91,6 +114,23 @@ namespace Service.Liquidity.DwhDataJob.Postgres
                 .UpsertRange(prices)
                 .On(e => new {e.BaseAsset, e.QuotedAsset})
                 .RunAsync();
+        }
+        
+        public async Task ExecBalanceDashboardMigrationAsync(ILogger logger)
+        {
+            try
+            {
+                var path = Path.Combine(Environment.CurrentDirectory, @"Scripts/", "BalanceDashboardMigration.sql");
+                using var script = new StreamReader(path);
+                var scriptBody = await script.ReadToEndAsync();
+                logger.LogInformation($"ExecBalanceDashboardMigrationAsync start at: {DateTime.UtcNow}.");
+                await Database.ExecuteSqlRawAsync(scriptBody);
+                logger.LogInformation($"ExecBalanceDashboardMigrationAsync finish at: {DateTime.UtcNow}.");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ex.Message);
+            }
         }
     }
 }

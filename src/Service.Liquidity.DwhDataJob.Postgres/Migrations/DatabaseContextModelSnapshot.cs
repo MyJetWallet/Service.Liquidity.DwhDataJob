@@ -20,6 +20,37 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                 .HasAnnotation("ProductVersion", "5.0.11")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+            modelBuilder.Entity("Service.Liquidity.DwhDataJob.Domain.Models.BalanceDashboard", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("Asset")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<decimal>("BrokerBalance")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("ClientBalance")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Commission")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Asset")
+                        .IsUnique();
+
+                    b.ToTable("balancedashboard");
+                });
+
             modelBuilder.Entity("Service.Liquidity.DwhDataJob.Postgres.Models.ConvertIndexPriceEntity", b =>
                 {
                     b.Property<long>("Id")
