@@ -1,6 +1,4 @@
 ﻿using Autofac;
-using Autofac.Core;
-using Autofac.Core.Registration;
 using Service.Liquidity.DwhDataJob.Engines;
 using Service.Liquidity.DwhDataJob.Jobs;
 using Service.Liquidity.DwhDataJob.Postgres;
@@ -17,13 +15,17 @@ namespace Service.Liquidity.DwhDataJob.Modules
                 .SingleInstance();
             
             builder
-                .RegisterType<MarketPriceJob>()
+                .RegisterType<IndexPriceJob>()
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
             
             builder
                 .RegisterType<MarketPriceEngine>()
+                .AsSelf()
+                .SingleInstance();
+            builder
+                .RegisterType<ConvertPriceEngine>()
                 .AsSelf()
                 .SingleInstance();
         }

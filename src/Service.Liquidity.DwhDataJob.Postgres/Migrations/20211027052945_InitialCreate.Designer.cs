@@ -10,7 +10,7 @@ using Service.Liquidity.DwhDataJob.Postgres;
 namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20211026150707_InitialCreate")]
+    [Migration("20211027052945_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,6 +21,43 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.11")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+            modelBuilder.Entity("Service.Liquidity.DwhDataJob.Postgres.Models.ConvertIndexPriceEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("BaseAsset")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("QuotedAsset")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Error");
+
+                    b.HasIndex("UpdateDate");
+
+                    b.HasIndex("BaseAsset", "QuotedAsset")
+                        .IsUnique();
+
+                    b.ToTable("convertprice");
+                });
 
             modelBuilder.Entity("Service.Liquidity.DwhDataJob.Postgres.Models.MarketPriceEntity", b =>
                 {

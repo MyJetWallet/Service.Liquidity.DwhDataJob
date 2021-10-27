@@ -8,8 +8,10 @@ namespace Service.Liquidity.DwhDataJob.Modules
     {
         protected override void Load(ContainerBuilder builder)
         {
-            var myNoSqlClient = builder.CreateNoSqlClient(Program.ReloadedSettings(e => e.MyNoSqlReaderHostPort));
+            var myNoSqlClient = builder
+                .CreateNoSqlClient(Program.ReloadedSettings(e => e.MyNoSqlReaderHostPort));
             builder.RegisterCurrentPricesClient(myNoSqlClient);
+            builder.RegisterConvertIndexPricesClient(myNoSqlClient);
         }
     }
 }

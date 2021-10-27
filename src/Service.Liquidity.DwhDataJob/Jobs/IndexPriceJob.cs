@@ -7,19 +7,22 @@ using Service.Liquidity.DwhDataJob.Engines;
 
 namespace Service.Liquidity.DwhDataJob.Jobs
 {
-    public class MarketPriceJob : IStartable
+    public class IndexPriceJob : IStartable
     {
-        private readonly ILogger<MarketPriceJob> _logger;
+        private readonly ILogger<IndexPriceJob> _logger;
         private readonly MyTaskTimer _timer;
         private readonly MarketPriceEngine _marketPriceEngine;
+        private readonly ConvertPriceEngine _convertPriceEngine;
 
-        public MarketPriceJob(ILogger<MarketPriceJob> logger,
-            MarketPriceEngine marketPriceEngine)
+        public IndexPriceJob(ILogger<IndexPriceJob> logger,
+            MarketPriceEngine marketPriceEngine, 
+            ConvertPriceEngine convertPriceEngine)
         {
             _logger = logger;
             _marketPriceEngine = marketPriceEngine;
+            _convertPriceEngine = convertPriceEngine;
 
-            _timer = new MyTaskTimer(nameof(MarketPriceJob), TimeSpan.FromSeconds(Program.Settings.MarketPriceJobTimerInSeconds), _logger, DoTime);
+            _timer = new MyTaskTimer(nameof(IndexPriceJob), TimeSpan.FromSeconds(Program.Settings.MarketPriceJobTimerInSeconds), _logger, DoTime);
             Console.WriteLine($"MarketPriceJob timer: {TimeSpan.FromSeconds(Program.Settings.MarketPriceJobTimerInSeconds)}");
         }
 
@@ -27,6 +30,7 @@ namespace Service.Liquidity.DwhDataJob.Jobs
         {
             _logger.LogInformation($"MarketPriceJob started at {DateTime.UtcNow}");
             await _marketPriceEngine.HandleMarketPrice();
+            await _convertPriceEngine.HandleConvertPrice();
         }
 
         public void Start()

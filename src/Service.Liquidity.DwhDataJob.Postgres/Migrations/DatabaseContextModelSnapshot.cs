@@ -20,6 +20,43 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                 .HasAnnotation("ProductVersion", "5.0.11")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+            modelBuilder.Entity("Service.Liquidity.DwhDataJob.Postgres.Models.ConvertIndexPriceEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("BaseAsset")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("QuotedAsset")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Error");
+
+                    b.HasIndex("UpdateDate");
+
+                    b.HasIndex("BaseAsset", "QuotedAsset")
+                        .IsUnique();
+
+                    b.ToTable("convertprice");
+                });
+
             modelBuilder.Entity("Service.Liquidity.DwhDataJob.Postgres.Models.MarketPriceEntity", b =>
                 {
                     b.Property<long>("Id")
