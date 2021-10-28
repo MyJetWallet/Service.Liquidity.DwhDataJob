@@ -31,6 +31,9 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<DateTime>("BalanceDate")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<decimal>("BrokerBalance")
                         .HasColumnType("numeric");
 
@@ -40,7 +43,7 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                     b.Property<decimal>("Commission")
                         .HasColumnType("numeric");
 
-                    b.Property<DateTime>("UpdateDate")
+                    b.Property<DateTime>("LastUpdateDate")
                         .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");

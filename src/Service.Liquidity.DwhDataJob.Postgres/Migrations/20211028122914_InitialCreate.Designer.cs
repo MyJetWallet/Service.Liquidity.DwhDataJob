@@ -10,7 +10,7 @@ using Service.Liquidity.DwhDataJob.Postgres;
 namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20211027181934_InitialCreate")]
+    [Migration("20211028122914_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,6 +33,9 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<DateTime>("BalanceDate")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<decimal>("BrokerBalance")
                         .HasColumnType("numeric");
 
@@ -42,7 +45,7 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                     b.Property<decimal>("Commission")
                         .HasColumnType("numeric");
 
-                    b.Property<DateTime>("UpdateDate")
+                    b.Property<DateTime>("LastUpdateDate")
                         .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");

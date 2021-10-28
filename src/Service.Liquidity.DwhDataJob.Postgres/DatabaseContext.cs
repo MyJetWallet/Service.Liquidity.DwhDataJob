@@ -54,7 +54,8 @@ namespace Service.Liquidity.DwhDataJob.Postgres
             modelBuilder.Entity<BalanceDashboard>().HasKey(e => e.Id);
             
             modelBuilder.Entity<BalanceDashboard>().Property(e => e.Asset).HasMaxLength(64);
-            modelBuilder.Entity<BalanceDashboard>().Property(e => e.UpdateDate);
+            modelBuilder.Entity<BalanceDashboard>().Property(e => e.BalanceDate);
+            modelBuilder.Entity<BalanceDashboard>().Property(e => e.LastUpdateDate);
             modelBuilder.Entity<BalanceDashboard>().Property(e => e.ClientBalance);
             modelBuilder.Entity<BalanceDashboard>().Property(e => e.BrokerBalance);
             modelBuilder.Entity<BalanceDashboard>().Property(e => e.Commission);

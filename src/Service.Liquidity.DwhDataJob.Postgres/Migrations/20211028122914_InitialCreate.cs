@@ -18,7 +18,8 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UpdateDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    BalanceDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    LastUpdateDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Asset = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     ClientBalance = table.Column<decimal>(type: "numeric", nullable: false),
                     BrokerBalance = table.Column<decimal>(type: "numeric", nullable: false),
