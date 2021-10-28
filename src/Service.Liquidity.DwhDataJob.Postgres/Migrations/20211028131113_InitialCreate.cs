@@ -69,10 +69,10 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_balancedashboard_Asset",
+                name: "IX_balancedashboard_Asset_BalanceDate",
                 schema: "liquidity_dwhdata",
                 table: "balancedashboard",
-                column: "Asset",
+                columns: new[] { "Asset", "BalanceDate" },
                 unique: true);
 
             migrationBuilder.CreateIndex(

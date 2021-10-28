@@ -22,5 +22,14 @@ namespace Service.Liquidity.DwhDataJob.Settings
 
         [YamlProperty("LiquidityDwhDataJob.PostgresConnectionString")]
         public string PostgresConnectionString { get; set; }
+
+        [YamlProperty("LiquidityDwhDataJob.SpotServiceBusHostPort")]
+        public string SpotServiceBusHostPort { get; set; }
+
+        [YamlProperty("LiquidityDwhDataJob.ClientWalletsGrpcServiceUrl")]
+        public string ClientWalletsGrpcServiceUrl { get; set; }
+
+        [YamlProperty("LiquidityDwhDataJob.BalanceDashboardPersistJobTimerInSeconds")]
+        public int BalanceDashboardPersistJobTimerInSeconds { get; set; }
     }
 }

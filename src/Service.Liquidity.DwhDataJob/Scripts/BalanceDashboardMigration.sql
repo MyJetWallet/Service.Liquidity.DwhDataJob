@@ -16,7 +16,8 @@ select "WalletId", "Symbol", "NewBalance" from
     ) t
 where t.rank = 1;
 
-truncate table liquidity_dwhdata.balancedashboard;
+delete from liquidity_dwhdata.balancedashboard
+where "BalanceDate" = (CURRENT_DATE);
 
 insert into liquidity_dwhdata.balancedashboard ("Asset", "LastUpdateDate", "BalanceDate", "ClientBalance", "BrokerBalance", "Commission")
 select

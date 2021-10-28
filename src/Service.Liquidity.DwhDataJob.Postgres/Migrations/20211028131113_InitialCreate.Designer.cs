@@ -10,7 +10,7 @@ using Service.Liquidity.DwhDataJob.Postgres;
 namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20211028122914_InitialCreate")]
+    [Migration("20211028131113_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,7 +50,7 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Asset")
+                    b.HasIndex("Asset", "BalanceDate")
                         .IsUnique();
 
                     b.ToTable("balancedashboard");

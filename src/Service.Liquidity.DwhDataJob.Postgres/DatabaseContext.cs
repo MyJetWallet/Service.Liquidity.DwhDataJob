@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -60,7 +61,7 @@ namespace Service.Liquidity.DwhDataJob.Postgres
             modelBuilder.Entity<BalanceDashboard>().Property(e => e.BrokerBalance);
             modelBuilder.Entity<BalanceDashboard>().Property(e => e.Commission);
             
-            modelBuilder.Entity<BalanceDashboard>().HasIndex(e => e.Asset).IsUnique();
+            modelBuilder.Entity<BalanceDashboard>().HasIndex(e => new {e.Asset, e.BalanceDate}).IsUnique();
         }
 
         private void SetConvertIndexPriceEntity(ModelBuilder modelBuilder)
@@ -132,6 +133,22 @@ namespace Service.Liquidity.DwhDataJob.Postgres
             {
                 logger.LogError(ex, ex.Message);
             }
+        }
+
+        public List<BalanceDashboard> GetBalanceDashboardList(DateTime balanceDate)
+        {
+            var dashboardList = BalanceDashboardCollection
+                .Where(e => e.BalanceDate >= balanceDate.Date.AddDays(-1))
+                .ToList();
+            return dashboardList;
+        }
+        
+        public async Task UpsertBalanceDashboard(IEnumerable<BalanceDashboard> dashboardList)
+        {
+            await BalanceDashboardCollection
+                .UpsertRange(dashboardList)
+                .On(e => new {e.Asset, e.BalanceDate})
+                .RunAsync();
         }
     }
 }

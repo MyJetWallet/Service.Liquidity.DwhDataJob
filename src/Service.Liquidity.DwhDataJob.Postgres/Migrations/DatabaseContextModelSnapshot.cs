@@ -48,7 +48,7 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Asset")
+                    b.HasIndex("Asset", "BalanceDate")
                         .IsUnique();
 
                     b.ToTable("balancedashboard");

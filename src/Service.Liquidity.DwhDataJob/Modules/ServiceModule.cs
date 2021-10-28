@@ -13,9 +13,25 @@ namespace Service.Liquidity.DwhDataJob.Modules
                 .RegisterType<DatabaseContextFactory>()
                 .AsSelf()
                 .SingleInstance();
+            builder
+                .RegisterType<BalanceDashboardEngine>()
+                .As<IStartable>()
+                .AsSelf()
+                .AutoActivate()
+                .SingleInstance();
             
             builder
                 .RegisterType<IndexPriceJob>()
+                .As<IStartable>()
+                .AutoActivate()
+                .SingleInstance();
+            builder
+                .RegisterType<BalanceDashboardUpdateJob>()
+                .As<IStartable>()
+                .AutoActivate()
+                .SingleInstance();
+            builder
+                .RegisterType<BalanceDashboardPersistJob>()
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
