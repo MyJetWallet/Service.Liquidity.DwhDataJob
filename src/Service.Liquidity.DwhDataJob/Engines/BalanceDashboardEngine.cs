@@ -46,16 +46,16 @@ namespace Service.Liquidity.DwhDataJob.Engines
             return todayDashboardSnapshot;
         }
         
-        public async Task UpdateDashboard(BalanceUpdate update)
+        public async Task UpdateDashboard(BalanceUpdate update, long headerSequenceNumber)
         {
             var walletInfo = await _clientWalletService.GetWalletInfoByIdAsync(new GetWalletInfoByIdRequest()
             {
                 WalletId = update.WalletId
             });
-            await UpdateBalance(walletInfo.WalletInfo, update);
+            await UpdateBalance(walletInfo.WalletInfo, update, headerSequenceNumber);
         }
 
-        private async Task UpdateBalance(ClientWallet walletInfo, BalanceUpdate update)
+        private async Task UpdateBalance(ClientWallet walletInfo, BalanceUpdate update, long headerSequenceNumber)
         {
             var retryCount = 0;
             while (!DashboardList.Any())
@@ -85,19 +85,20 @@ namespace Service.Liquidity.DwhDataJob.Engines
                     .ToList();
                 if (todayBalances.Any())
                 {
-                    UpdateTodayBalance(walletInfo, todayBalances, update);
+                    UpdateTodayBalance(walletInfo, todayBalances, update, headerSequenceNumber);
                 }
                 else
                 {
-                    CreateAndUpdateTodayBalance(walletInfo, update);
+                    CreateAndUpdateTodayBalance(walletInfo, update, headerSequenceNumber);
                 }
             }
         }
 
-        private void CreateAndUpdateTodayBalance(ClientWallet walletInfo, BalanceUpdate update)
+        private void CreateAndUpdateTodayBalance(ClientWallet walletInfo, BalanceUpdate update,
+            long headerSequenceNumber)
         {
             var todayBalances = CreateTodayBalances(update);
-            UpdateTodayBalance(walletInfo, todayBalances, update);
+            UpdateTodayBalance(walletInfo, todayBalances, update, headerSequenceNumber);
             DashboardList.AddRange(todayBalances);
         }
 
@@ -128,14 +129,15 @@ namespace Service.Liquidity.DwhDataJob.Engines
                     Asset = balanceDashboard.Asset,
                     ClientBalance = lastBalance.ClientBalance,
                     BrokerBalance = lastBalance.BrokerBalance,
-                    Commission = lastBalance.Commission
+                    Commission = lastBalance.Commission,
+                    LastMessageId = lastBalance.LastMessageId
                 });
             }
             return todayBalances;
         }
 
         private void UpdateTodayBalance(ClientWallet walletInfo,
-            IEnumerable<BalanceDashboard> dashboardList, BalanceUpdate update)
+            IEnumerable<BalanceDashboard> dashboardList, BalanceUpdate update, long headerSequenceNumber)
         {
             var balanceByAsset = dashboardList.FirstOrDefault(e => e.Asset == update.AssetId);
             if (balanceByAsset == null)
@@ -155,6 +157,7 @@ namespace Service.Liquidity.DwhDataJob.Engines
                 balanceByAsset.ClientBalance += difference;
             }
             balanceByAsset.LastUpdateDate = DateTime.UtcNow;
+            balanceByAsset.LastMessageId = headerSequenceNumber;
         }
 
         public void Start()

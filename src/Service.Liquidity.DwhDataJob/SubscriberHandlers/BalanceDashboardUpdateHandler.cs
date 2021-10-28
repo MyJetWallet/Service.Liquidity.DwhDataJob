@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using DotNetCoreDecorators;
@@ -32,9 +33,24 @@ namespace Service.Liquidity.DwhDataJob.SubscriberHandlers
             {
                 foreach (var meEvent in events)
                 {
+                    var messageId = meEvent.Header.SequenceNumber;
                     foreach (var update in meEvent.BalanceUpdates)
                     {
-                        await _balanceDashboardEngine.UpdateDashboard(update);
+                        var dashboardSnapshot = _balanceDashboardEngine.GetTodayDashboardSnapshot();
+                        var lastBalanceByAsset = dashboardSnapshot
+                            .Where(e => e.Asset == update.AssetId)
+                            .OrderByDescending(e => e.LastUpdateDate)
+                            .FirstOrDefault();
+
+                        if (lastBalanceByAsset == null ||
+                            lastBalanceByAsset.LastMessageId != messageId)
+                        {
+                            await _balanceDashboardEngine.UpdateDashboard(update, messageId);
+                        }
+                        else
+                        {
+                            _logger.LogError($"BalanceDashboardUpdateHandler handle duplicate message. SequenceNumber = {messageId}");
+                        }
                     }
                 }
             }

@@ -12,6 +12,7 @@ namespace Service.Liquidity.DwhDataJob.Domain.Models
         public decimal ClientBalance { get; set; }
         public decimal BrokerBalance { get; set; }
         public decimal Commission { get; set; }
+        public long LastMessageId { get; set; }
 
         public static BalanceDashboard GetCopy(BalanceDashboard entity)
         {
@@ -22,7 +23,8 @@ namespace Service.Liquidity.DwhDataJob.Domain.Models
                 Asset = entity.Asset,
                 ClientBalance = entity.ClientBalance,
                 BrokerBalance = entity.BrokerBalance,
-                Commission = entity.Commission
+                Commission = entity.Commission,
+                LastMessageId = entity.LastMessageId
             };
         }
     }

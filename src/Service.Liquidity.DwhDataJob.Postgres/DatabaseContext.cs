@@ -60,6 +60,7 @@ namespace Service.Liquidity.DwhDataJob.Postgres
             modelBuilder.Entity<BalanceDashboard>().Property(e => e.ClientBalance);
             modelBuilder.Entity<BalanceDashboard>().Property(e => e.BrokerBalance);
             modelBuilder.Entity<BalanceDashboard>().Property(e => e.Commission);
+            modelBuilder.Entity<BalanceDashboard>().Property(e => e.LastMessageId);
             
             modelBuilder.Entity<BalanceDashboard>().HasIndex(e => new {e.Asset, e.BalanceDate}).IsUnique();
         }
