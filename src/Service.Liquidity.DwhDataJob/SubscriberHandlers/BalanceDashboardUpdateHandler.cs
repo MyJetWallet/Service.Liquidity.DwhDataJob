@@ -8,14 +8,14 @@ using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using Service.Liquidity.DwhDataJob.Engines;
 
-namespace Service.Liquidity.DwhDataJob.Jobs
+namespace Service.Liquidity.DwhDataJob.SubscriberHandlers
 {
-    public class BalanceDashboardUpdateJob : IStartable
+    public class BalanceDashboardUpdateHandler : IStartable
     {
-        private readonly ILogger<BalanceDashboardUpdateJob> _logger;
+        private readonly ILogger<BalanceDashboardUpdateHandler> _logger;
         private readonly BalanceDashboardEngine _balanceDashboardEngine;
 
-        public BalanceDashboardUpdateJob(ILogger<BalanceDashboardUpdateJob> logger,
+        public BalanceDashboardUpdateHandler(ILogger<BalanceDashboardUpdateHandler> logger,
             ISubscriber<IReadOnlyList<OutgoingEvent>> subscriber, 
             BalanceDashboardEngine balanceDashboardEngine)
         {

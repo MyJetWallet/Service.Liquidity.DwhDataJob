@@ -5,17 +5,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Autofac;
-using MyJetWallet.Sdk.GrpcMetrics;
 using MyJetWallet.Sdk.GrpcSchema;
 using MyJetWallet.Sdk.Postgres;
 using MyJetWallet.Sdk.Service;
 using Prometheus;
-using ProtoBuf.Grpc.Server;
-using Service.Liquidity.DwhDataJob.Grpc;
 using Service.Liquidity.DwhDataJob.Modules;
 using Service.Liquidity.DwhDataJob.Postgres;
-using Service.Liquidity.DwhDataJob.Services;
-using SimpleTrading.BaseMetrics;
 using SimpleTrading.ServiceStatusReporterConnector;
 
 namespace Service.Liquidity.DwhDataJob
@@ -48,8 +43,6 @@ namespace Service.Liquidity.DwhDataJob
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcSchema<HelloService, IHelloService>();
-
                 endpoints.MapGrpcSchemaRegistry();
 
                 endpoints.MapGet("/", async context =>

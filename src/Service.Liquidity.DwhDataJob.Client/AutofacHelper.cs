@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using Service.Liquidity.DwhDataJob.Grpc;
 
 // ReSharper disable UnusedMember.Global
 
@@ -9,9 +8,6 @@ namespace Service.Liquidity.DwhDataJob.Client
     {
         public static void DwhDataJobClient(this ContainerBuilder builder, string grpcServiceUrl)
         {
-            var factory = new DwhDataJobClientFactory(grpcServiceUrl);
-
-            builder.RegisterInstance(factory.GetHelloService()).As<IHelloService>().SingleInstance();
         }
     }
 }

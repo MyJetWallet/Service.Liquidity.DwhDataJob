@@ -2,6 +2,7 @@
 using Service.Liquidity.DwhDataJob.Engines;
 using Service.Liquidity.DwhDataJob.Jobs;
 using Service.Liquidity.DwhDataJob.Postgres;
+using Service.Liquidity.DwhDataJob.SubscriberHandlers;
 
 namespace Service.Liquidity.DwhDataJob.Modules
 {
@@ -26,7 +27,7 @@ namespace Service.Liquidity.DwhDataJob.Modules
                 .AutoActivate()
                 .SingleInstance();
             builder
-                .RegisterType<BalanceDashboardUpdateJob>()
+                .RegisterType<BalanceDashboardUpdateHandler>()
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
