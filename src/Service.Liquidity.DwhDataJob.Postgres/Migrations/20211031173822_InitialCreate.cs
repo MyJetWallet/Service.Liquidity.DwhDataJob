@@ -23,11 +23,29 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                     Asset = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     ClientBalance = table.Column<decimal>(type: "numeric", nullable: false),
                     BrokerBalance = table.Column<decimal>(type: "numeric", nullable: false),
-                    Commission = table.Column<decimal>(type: "numeric", nullable: false)
+                    LastMessageId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_balancedashboard", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "commissiondashboard",
+                schema: "liquidity_dwhdata",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    CommissionDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    LastUpdateDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    Asset = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    Commission = table.Column<decimal>(type: "numeric", nullable: false),
+                    LastMessageId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_commissiondashboard", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -73,6 +91,13 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                 schema: "liquidity_dwhdata",
                 table: "balancedashboard",
                 columns: new[] { "Asset", "BalanceDate" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_commissiondashboard_Asset_CommissionDate",
+                schema: "liquidity_dwhdata",
+                table: "commissiondashboard",
+                columns: new[] { "Asset", "CommissionDate" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -124,6 +149,10 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
         {
             migrationBuilder.DropTable(
                 name: "balancedashboard",
+                schema: "liquidity_dwhdata");
+
+            migrationBuilder.DropTable(
+                name: "commissiondashboard",
                 schema: "liquidity_dwhdata");
 
             migrationBuilder.DropTable(

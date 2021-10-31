@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.CompilerServices;
 
 namespace Service.Liquidity.DwhDataJob.Domain.Models
 {
@@ -11,7 +10,6 @@ namespace Service.Liquidity.DwhDataJob.Domain.Models
         public string Asset { get; set; }
         public decimal ClientBalance { get; set; }
         public decimal BrokerBalance { get; set; }
-        public decimal Commission { get; set; }
         public long LastMessageId { get; set; }
 
         public static BalanceDashboard GetCopy(BalanceDashboard entity)
@@ -23,7 +21,6 @@ namespace Service.Liquidity.DwhDataJob.Domain.Models
                 Asset = entity.Asset,
                 ClientBalance = entity.ClientBalance,
                 BrokerBalance = entity.BrokerBalance,
-                Commission = entity.Commission,
                 LastMessageId = entity.LastMessageId
             };
         }

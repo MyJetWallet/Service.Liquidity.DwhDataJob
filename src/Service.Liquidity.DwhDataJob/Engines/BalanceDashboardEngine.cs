@@ -129,7 +129,6 @@ namespace Service.Liquidity.DwhDataJob.Engines
                     Asset = balanceDashboard.Asset,
                     ClientBalance = lastBalance.ClientBalance,
                     BrokerBalance = lastBalance.BrokerBalance,
-                    Commission = lastBalance.Commission,
                     LastMessageId = lastBalance.LastMessageId
                 });
             }

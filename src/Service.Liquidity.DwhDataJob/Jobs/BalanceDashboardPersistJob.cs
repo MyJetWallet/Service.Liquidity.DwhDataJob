@@ -36,7 +36,7 @@ namespace Service.Liquidity.DwhDataJob.Jobs
         private async Task PersistDashboard()
         {
             var todaySnapshot = _balanceDashboardEngine.GetTodayDashboardSnapshot();
-            _logger.LogInformation($"PersistDashboard persist {todaySnapshot.Count} records at {DateTime.UtcNow}");
+            _logger.LogInformation($"BalanceDashboardPersistJob persist {todaySnapshot.Count} records at {DateTime.UtcNow}");
             await using var ctx = _databaseContextFactory.Create();
             await ctx.UpsertBalanceDashboard(todaySnapshot);
         }

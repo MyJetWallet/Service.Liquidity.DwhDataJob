@@ -31,5 +31,9 @@ namespace Service.Liquidity.DwhDataJob.Settings
 
         [YamlProperty("LiquidityDwhDataJob.BalanceDashboardPersistJobTimerInSeconds")]
         public int BalanceDashboardPersistJobTimerInSeconds { get; set; }
+
+        
+        [YamlProperty("LiquidityDwhDataJob.CommissionDashboardPersistJobTimerInSeconds")]
+        public int CommissionDashboardPersistJobTimerInSeconds { get; set; }
     }
 }

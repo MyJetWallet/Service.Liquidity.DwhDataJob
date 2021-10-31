@@ -19,14 +19,14 @@ where t.rank = 1;
 delete from liquidity_dwhdata.balancedashboard
 where "BalanceDate" = (CURRENT_DATE);
 
-insert into liquidity_dwhdata.balancedashboard ("Asset", "LastUpdateDate", "BalanceDate", "ClientBalance", "BrokerBalance", "Commission")
+insert into liquidity_dwhdata.balancedashboard ("Asset", "LastUpdateDate", "BalanceDate", "ClientBalance", "BrokerBalance", "LastMessageId")
 select
     ass.Symbol as Asset,
     (current_timestamp at time zone 'utc') as LastUpdateDate,
     (CURRENT_DATE) as BalanceDate,
     coalesce(sum(bext.NewBalance), 0) as ClientBalance,
     coalesce(sum(bint.NewBalance), 0) as BrokerBalance,
-    0 as Commission
+    0 as LastMessageId
 from temp_wallet_balances as ass
          left join clientwallets.wallets as w
                    on ass.WalletId = w."WalletId"

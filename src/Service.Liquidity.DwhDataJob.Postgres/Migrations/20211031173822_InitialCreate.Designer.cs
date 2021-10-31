@@ -10,7 +10,7 @@ using Service.Liquidity.DwhDataJob.Postgres;
 namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20211028131113_InitialCreate")]
+    [Migration("20211031173822_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -42,8 +42,8 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                     b.Property<decimal>("ClientBalance")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("Commission")
-                        .HasColumnType("numeric");
+                    b.Property<long>("LastMessageId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("LastUpdateDate")
                         .HasColumnType("timestamp without time zone");
@@ -54,6 +54,38 @@ namespace Service.Liquidity.DwhDataJob.Postgres.Migrations
                         .IsUnique();
 
                     b.ToTable("balancedashboard");
+                });
+
+            modelBuilder.Entity("Service.Liquidity.DwhDataJob.Domain.Models.CommissionDashboard", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("Asset")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<decimal>("Commission")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CommissionDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("LastMessageId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime>("LastUpdateDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Asset", "CommissionDate")
+                        .IsUnique();
+
+                    b.ToTable("commissiondashboard");
                 });
 
             modelBuilder.Entity("Service.Liquidity.DwhDataJob.Postgres.Models.ConvertIndexPriceEntity", b =>

@@ -14,11 +14,26 @@ namespace Service.Liquidity.DwhDataJob.Modules
                 .RegisterType<DatabaseContextFactory>()
                 .AsSelf()
                 .SingleInstance();
+            
             builder
                 .RegisterType<BalanceDashboardEngine>()
                 .As<IStartable>()
                 .AsSelf()
                 .AutoActivate()
+                .SingleInstance();
+            builder
+                .RegisterType<CommissionDashboardEngine>()
+                .As<IStartable>()
+                .AsSelf()
+                .AutoActivate()
+                .SingleInstance();
+            builder
+                .RegisterType<MarketPriceEngine>()
+                .AsSelf()
+                .SingleInstance();
+            builder
+                .RegisterType<ConvertPriceEngine>()
+                .AsSelf()
                 .SingleInstance();
             
             builder
@@ -27,23 +42,25 @@ namespace Service.Liquidity.DwhDataJob.Modules
                 .AutoActivate()
                 .SingleInstance();
             builder
-                .RegisterType<BalanceDashboardUpdateHandler>()
+                .RegisterType<BalanceDashboardPersistJob>()
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
             builder
-                .RegisterType<BalanceDashboardPersistJob>()
+                .RegisterType<CommissionDashboardPersistJob>()
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
             
             builder
-                .RegisterType<MarketPriceEngine>()
-                .AsSelf()
+                .RegisterType<BalanceDashboardUpdateHandler>()
+                .As<IStartable>()
+                .AutoActivate()
                 .SingleInstance();
             builder
-                .RegisterType<ConvertPriceEngine>()
-                .AsSelf()
+                .RegisterType<LiquidityConvertorSwapHandler>()
+                .As<IStartable>()
+                .AutoActivate()
                 .SingleInstance();
         }
     }

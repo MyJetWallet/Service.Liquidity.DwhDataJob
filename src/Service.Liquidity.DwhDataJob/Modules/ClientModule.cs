@@ -5,6 +5,7 @@ using MyJetWallet.Sdk.ServiceBus;
 using MyServiceBus.Abstractions;
 using Service.ClientWallets.Client;
 using Service.IndexPrices.Client;
+using Service.Liquidity.Converter.Domain.Models;
 using Service.MatchingEngine.EventBridge.ServiceBus;
 
 namespace Service.Liquidity.DwhDataJob.Modules
@@ -21,6 +22,8 @@ namespace Service.Liquidity.DwhDataJob.Modules
             var serviceBusClient = builder.RegisterMyServiceBusTcpClient(Program.ReloadedSettings(e => e.SpotServiceBusHostPort),
                 Program.LogFactory);
             builder.RegisterMeEventSubscriber(serviceBusClient, "dwh-data-job", TopicQueueType.PermanentWithSingleConnection);
+            builder.RegisterMyServiceBusSubscriberBatch<SwapMessage>(serviceBusClient, 
+                SwapMessage.TopicName, "DwhDataJob-Swaps", TopicQueueType.PermanentWithSingleConnection);
             
             builder.RegisterClientWalletsClientsWithoutCache(Program.Settings.ClientWalletsGrpcServiceUrl);
         }

@@ -17,11 +17,13 @@ namespace Service.Liquidity.DwhDataJob.Postgres
         private const string MarketPriceTableName = "marketprice";
         private const string ConvertIndexPriceTableName = "convertprice";
         private const string BalanceDashboardTableName = "balancedashboard";
+        private const string CommissionDashboardTableName = "commissiondashboard";
         
         private DbSet<MarketPriceEntity> MarketPriceCollection { get; set; }
         private DbSet<ConvertIndexPriceEntity> ConvertIndexPriceCollection { get; set; }
         
         private DbSet<BalanceDashboard> BalanceDashboardCollection { get; set; }
+        private DbSet<CommissionDashboard> CommissionDashboardCollection { get; set; }
         
         public DatabaseContext(DbContextOptions options) : base(options)
         {
@@ -43,8 +45,25 @@ namespace Service.Liquidity.DwhDataJob.Postgres
             SetMarketPriceEntity(modelBuilder);
             SetConvertIndexPriceEntity(modelBuilder);
             SetBalanceDashboardEntity(modelBuilder);
+            SetCommissionDashboardEntity(modelBuilder);
             
             base.OnModelCreating(modelBuilder);
+        }
+
+        private void SetCommissionDashboardEntity(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CommissionDashboard>().ToTable(CommissionDashboardTableName);
+            
+            modelBuilder.Entity<CommissionDashboard>().Property(e => e.Id).UseIdentityColumn();
+            modelBuilder.Entity<CommissionDashboard>().HasKey(e => e.Id);
+            
+            modelBuilder.Entity<CommissionDashboard>().Property(e => e.Asset).HasMaxLength(64);
+            modelBuilder.Entity<CommissionDashboard>().Property(e => e.CommissionDate);
+            modelBuilder.Entity<CommissionDashboard>().Property(e => e.LastUpdateDate);
+            modelBuilder.Entity<CommissionDashboard>().Property(e => e.Commission);
+            modelBuilder.Entity<CommissionDashboard>().Property(e => e.LastMessageId).HasMaxLength(64);
+            
+            modelBuilder.Entity<CommissionDashboard>().HasIndex(e => new {e.Asset, e.CommissionDate}).IsUnique();
         }
 
         private void SetBalanceDashboardEntity(ModelBuilder modelBuilder)
@@ -59,7 +78,6 @@ namespace Service.Liquidity.DwhDataJob.Postgres
             modelBuilder.Entity<BalanceDashboard>().Property(e => e.LastUpdateDate);
             modelBuilder.Entity<BalanceDashboard>().Property(e => e.ClientBalance);
             modelBuilder.Entity<BalanceDashboard>().Property(e => e.BrokerBalance);
-            modelBuilder.Entity<BalanceDashboard>().Property(e => e.Commission);
             modelBuilder.Entity<BalanceDashboard>().Property(e => e.LastMessageId);
             
             modelBuilder.Entity<BalanceDashboard>().HasIndex(e => new {e.Asset, e.BalanceDate}).IsUnique();
@@ -149,6 +167,22 @@ namespace Service.Liquidity.DwhDataJob.Postgres
             await BalanceDashboardCollection
                 .UpsertRange(dashboardList)
                 .On(e => new {e.Asset, e.BalanceDate})
+                .RunAsync();
+        }
+        
+        public List<CommissionDashboard> GetCommissionDashboardList(DateTime commissionDate)
+        {
+            var dashboardList = CommissionDashboardCollection
+                .Where(e => e.CommissionDate >= commissionDate.Date.AddDays(-1))
+                .ToList();
+            return dashboardList;
+        }
+        
+        public async Task UpsertCommissionDashboard(IEnumerable<CommissionDashboard> dashboardList)
+        {
+            await CommissionDashboardCollection
+                .UpsertRange(dashboardList)
+                .On(e => new {e.Asset, e.CommissionDate})
                 .RunAsync();
         }
     }
