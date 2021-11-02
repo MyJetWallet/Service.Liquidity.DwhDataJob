@@ -18,12 +18,14 @@ namespace Service.Liquidity.DwhDataJob.Postgres
         private const string ConvertIndexPriceTableName = "convertprice";
         private const string BalanceDashboardTableName = "balancedashboard";
         private const string CommissionDashboardTableName = "commissiondashboard";
+        private const string ExternalBalanceTableName = "externalbalance";
         
         private DbSet<MarketPriceEntity> MarketPriceCollection { get; set; }
         private DbSet<ConvertIndexPriceEntity> ConvertIndexPriceCollection { get; set; }
         
         private DbSet<BalanceDashboard> BalanceDashboardCollection { get; set; }
         private DbSet<CommissionDashboard> CommissionDashboardCollection { get; set; }
+        private DbSet<ExternalBalanceEntity> ExternalBalanceCollection { get; set; }
         
         public DatabaseContext(DbContextOptions options) : base(options)
         {
@@ -46,8 +48,28 @@ namespace Service.Liquidity.DwhDataJob.Postgres
             SetConvertIndexPriceEntity(modelBuilder);
             SetBalanceDashboardEntity(modelBuilder);
             SetCommissionDashboardEntity(modelBuilder);
-            
+            SetExternalBalanceEntity(modelBuilder);
+
             base.OnModelCreating(modelBuilder);
+        }
+
+        private void SetExternalBalanceEntity(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ExternalBalanceEntity>().ToTable(ExternalBalanceTableName);
+            
+            modelBuilder.Entity<ExternalBalanceEntity>().Property(e => e.Id).UseIdentityColumn();
+            modelBuilder.Entity<ExternalBalanceEntity>().HasKey(e => e.Id);
+            
+            modelBuilder.Entity<ExternalBalanceEntity>().Property(e => e.Asset).HasMaxLength(64);
+            modelBuilder.Entity<ExternalBalanceEntity>().Property(e => e.BalanceDate);
+            modelBuilder.Entity<ExternalBalanceEntity>().Property(e => e.LastUpdateDate);
+            modelBuilder.Entity<ExternalBalanceEntity>().Property(e => e.Balance);
+            modelBuilder.Entity<ExternalBalanceEntity>().Property(e => e.Exchange).HasMaxLength(64);
+            
+            modelBuilder.Entity<ExternalBalanceEntity>().HasIndex(e => new {e.Exchange, e.Asset, e.BalanceDate}).IsUnique();
+            modelBuilder.Entity<ExternalBalanceEntity>().HasIndex(e => e.Exchange);
+            modelBuilder.Entity<ExternalBalanceEntity>().HasIndex(e => e.Asset);
+            modelBuilder.Entity<ExternalBalanceEntity>().HasIndex(e => e.BalanceDate);
         }
 
         private void SetCommissionDashboardEntity(ModelBuilder modelBuilder)
@@ -183,6 +205,14 @@ namespace Service.Liquidity.DwhDataJob.Postgres
             await CommissionDashboardCollection
                 .UpsertRange(dashboardList)
                 .On(e => new {e.Asset, e.CommissionDate})
+                .RunAsync();
+        }
+
+        public async Task UpsertExternalBalances(IEnumerable<ExternalBalanceEntity> allBalances)
+        {
+            await ExternalBalanceCollection
+                .UpsertRange(allBalances)
+                .On(e => new {e.Exchange, e.Asset, e.BalanceDate})
                 .RunAsync();
         }
     }

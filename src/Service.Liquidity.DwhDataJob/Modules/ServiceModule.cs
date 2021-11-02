@@ -51,6 +51,11 @@ namespace Service.Liquidity.DwhDataJob.Modules
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
+            builder
+                .RegisterType<ExternalBalancesJob>()
+                .As<IStartable>()
+                .AutoActivate()
+                .SingleInstance();
             
             builder
                 .RegisterType<BalanceDashboardUpdateHandler>()

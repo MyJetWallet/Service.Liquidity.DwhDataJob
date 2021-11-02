@@ -6,6 +6,7 @@ using MyServiceBus.Abstractions;
 using Service.ClientWallets.Client;
 using Service.IndexPrices.Client;
 using Service.Liquidity.Converter.Domain.Models;
+using Service.Liquidity.InternalWallets.Client;
 using Service.MatchingEngine.EventBridge.ServiceBus;
 
 namespace Service.Liquidity.DwhDataJob.Modules
@@ -26,6 +27,7 @@ namespace Service.Liquidity.DwhDataJob.Modules
                 SwapMessage.TopicName, "DwhDataJob-Swaps", TopicQueueType.PermanentWithSingleConnection);
             
             builder.RegisterClientWalletsClientsWithoutCache(Program.Settings.ClientWalletsGrpcServiceUrl);
+            builder.InternalWalletsClient(Program.Settings.InternalWalletsGrpcUrl);
         }
     }
 }

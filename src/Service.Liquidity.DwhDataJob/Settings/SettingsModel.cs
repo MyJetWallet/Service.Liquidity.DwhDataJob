@@ -35,5 +35,11 @@ namespace Service.Liquidity.DwhDataJob.Settings
         
         [YamlProperty("LiquidityDwhDataJob.CommissionDashboardPersistJobTimerInSeconds")]
         public int CommissionDashboardPersistJobTimerInSeconds { get; set; }
+
+        [YamlProperty("LiquidityDwhDataJob.ExternalBalancesJobTimerInSeconds")]
+        public int ExternalBalancesJobTimerInSeconds { get; set; }
+
+        [YamlProperty("LiquidityDwhDataJob.InternalWalletsGrpcUrl")]
+        public string InternalWalletsGrpcUrl { get; set; }
     }
 }
