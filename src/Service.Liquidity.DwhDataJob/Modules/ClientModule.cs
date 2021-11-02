@@ -1,8 +1,9 @@
 using Autofac;
+using MyJetWallet.BitGo.Settings.Ioc;
 using MyJetWallet.Sdk.NoSql;
-using MyJetWallet.Sdk.Service;
 using MyJetWallet.Sdk.ServiceBus;
 using MyServiceBus.Abstractions;
+using Service.Bitgo.Watcher.Client;
 using Service.ClientWallets.Client;
 using Service.IndexPrices.Client;
 using Service.Liquidity.Converter.Domain.Models;
@@ -19,6 +20,8 @@ namespace Service.Liquidity.DwhDataJob.Modules
                 .CreateNoSqlClient(Program.ReloadedSettings(e => e.MyNoSqlReaderHostPort));
             builder.RegisterCurrentPricesClient(myNoSqlClient);
             builder.RegisterConvertIndexPricesClient(myNoSqlClient);
+            builder.RegisterBitgoSettingsReader(myNoSqlClient);
+            builder.RegisterBitgoWatcherClient(myNoSqlClient);
 
             var serviceBusClient = builder.RegisterMyServiceBusTcpClient(Program.ReloadedSettings(e => e.SpotServiceBusHostPort),
                 Program.LogFactory);

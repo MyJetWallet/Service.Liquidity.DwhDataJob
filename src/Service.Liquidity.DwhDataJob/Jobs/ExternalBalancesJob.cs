@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using Microsoft.Extensions.Logging;
+using MyJetWallet.BitGo.Settings.Services;
 using MyJetWallet.Sdk.Service.Tools;
+using MyNoSqlServer.Abstractions;
 using Newtonsoft.Json;
+using Service.Bitgo.Watcher.NoSql;
 using Service.Liquidity.DwhDataJob.Postgres;
 using Service.Liquidity.DwhDataJob.Postgres.Models;
 using Service.Liquidity.InternalWallets.Grpc;
@@ -19,14 +22,20 @@ namespace Service.Liquidity.DwhDataJob.Jobs
         private readonly MyTaskTimer _timer;
         private readonly IExternalMarketsGrpc _externalMarketsGrpc;
         private readonly DatabaseContextFactory _databaseContextFactory;
+        private readonly IAssetMapper _assetMapper;
+        private readonly IMyNoSqlServerDataReader<WalletBalanceEntity> _walletBalanceReader;
     
         public ExternalBalancesJob(ILogger<ExternalBalancesJob> logger, 
             IExternalMarketsGrpc externalMarketsGrpc, 
-            DatabaseContextFactory databaseContextFactory)
+            DatabaseContextFactory databaseContextFactory, 
+            IAssetMapper assetMapper, 
+            IMyNoSqlServerDataReader<WalletBalanceEntity> walletBalanceReader)
         {
             _logger = logger;
             _externalMarketsGrpc = externalMarketsGrpc;
             _databaseContextFactory = databaseContextFactory;
+            _assetMapper = assetMapper;
+            _walletBalanceReader = walletBalanceReader;
 
             _timer = new MyTaskTimer(nameof(ExternalBalancesJob), 
                 TimeSpan.FromSeconds(Program.Settings.ExternalBalancesJobTimerInSeconds), _logger, DoTime);
@@ -46,6 +55,7 @@ namespace Service.Liquidity.DwhDataJob.Jobs
                 
                 var externalExchanges = await _externalMarketsGrpc.GetExternalMarketListAsync();
                 var exchangesList = externalExchanges.Data.List;
+                var iterationTime = DateTime.UtcNow;
                 
                 _logger.LogInformation("PersistExternalBalances find exchanges: {exchangesJson}.", 
                     JsonConvert.SerializeObject(exchangesList));
@@ -65,10 +75,14 @@ namespace Service.Liquidity.DwhDataJob.Jobs
                         Exchange = exchange,
                         Asset = e.Asset,
                         Balance = (decimal) e.Balance,
-                        BalanceDate = DateTime.UtcNow.Date,
-                        LastUpdateDate = DateTime.UtcNow
+                        BalanceDate = iterationTime.Date,
+                        LastUpdateDate = iterationTime
                     }));
                 }
+
+                var bitGoBalances = GetBitGoBalances(iterationTime);
+                allBalances.AddRange(bitGoBalances);
+                
                 await using var ctx = _databaseContextFactory.Create();
                 await ctx.UpsertExternalBalances(allBalances);
                 _logger.LogInformation("PersistExternalBalances saved {balanceCount} balances.", 
@@ -78,6 +92,38 @@ namespace Service.Liquidity.DwhDataJob.Jobs
             {
                 _logger.LogError(ex, ex.Message);
             }
+        }
+
+        private IEnumerable<ExternalBalanceEntity> GetBitGoBalances(DateTime iterationTime)
+        {
+            var resultBalances = new List<ExternalBalanceEntity>();
+            try
+            {
+                var balancesBitGo = _walletBalanceReader.Get();
+                foreach (var balanceEntity in balancesBitGo)
+                {
+                    var (broker, asset) = _assetMapper.BitgoCoinToAsset(balanceEntity.AssetSymbol, balanceEntity.WalletId);
+                    if (string.IsNullOrWhiteSpace(asset))
+                    {
+                        _logger.LogWarning($"Cannot map {balanceEntity.AssetSymbol} from BitGo.");
+                        continue;
+                    }
+                    resultBalances.Add(new ExternalBalanceEntity()
+                    {
+                        Exchange = "BitGo",
+                        Asset = asset,
+                        Balance = (decimal) balanceEntity.Balance,
+                        BalanceDate = iterationTime.Date,
+                        LastUpdateDate = iterationTime
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+            }
+            _logger.LogInformation($"GetBitGoBalances return {resultBalances.Count} balances.");
+            return resultBalances;
         }
 
         public void Start()
