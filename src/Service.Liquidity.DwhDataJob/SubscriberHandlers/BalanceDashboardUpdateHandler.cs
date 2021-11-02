@@ -34,22 +34,36 @@ namespace Service.Liquidity.DwhDataJob.SubscriberHandlers
                 foreach (var meEvent in events)
                 {
                     var messageId = meEvent.Header.SequenceNumber;
-                    foreach (var update in meEvent.BalanceUpdates)
+
+                    var hasDuplicate = new Dictionary<string, bool>();
+                    
+                    foreach (var asset in meEvent.BalanceUpdates.Select(e => e.AssetId).Distinct())
                     {
                         var dashboardSnapshot = _balanceDashboardEngine.GetTodayDashboardSnapshot();
                         var lastBalanceByAsset = dashboardSnapshot
-                            .Where(e => e.Asset == update.AssetId)
+                            .Where(e => e.Asset == asset)
                             .OrderByDescending(e => e.LastUpdateDate)
+                            .Take(1)
                             .FirstOrDefault();
-
+                        bool isDouble;
                         if (lastBalanceByAsset == null ||
                             lastBalanceByAsset.LastMessageId != messageId)
                         {
-                            await _balanceDashboardEngine.UpdateDashboard(update, messageId);
+                            isDouble = false;
                         }
                         else
                         {
+                            isDouble = true;
                             _logger.LogError($"BalanceDashboardUpdateHandler handle duplicate message. SequenceNumber = {messageId}");
+                        }
+                        hasDuplicate.Add(asset, isDouble);
+                    }
+                    
+                    foreach (var update in meEvent.BalanceUpdates)
+                    {
+                        if (!hasDuplicate[update.AssetId])
+                        {
+                            await _balanceDashboardEngine.UpdateDashboard(update, messageId);
                         }
                     }
                 }
@@ -58,6 +72,7 @@ namespace Service.Liquidity.DwhDataJob.SubscriberHandlers
             {
                 ex.FailActivity();
                 events.AddToActivityAsJsonTag("me events");
+                _logger.LogError(ex, ex.Message);
                 throw;
             }
         }
