@@ -41,7 +41,7 @@ namespace Service.Liquidity.DwhDataJob.Engines
             return todayDashboardSnapshot;
         }
         
-        public async Task UpdateDashboard(SwapMessage message, string id)
+        public Task UpdateDashboard(SwapMessage message, string id)
         {
             lock (_locker)
             {
@@ -60,6 +60,8 @@ namespace Service.Liquidity.DwhDataJob.Engines
                     CreateAndUpdateTodayBalance(message, id);
                 }
             }
+            
+            return Task.CompletedTask;
         }
         
         private void CreateAndUpdateTodayBalance(SwapMessage message, string id)
