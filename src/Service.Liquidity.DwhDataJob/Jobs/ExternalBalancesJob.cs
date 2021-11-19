@@ -54,7 +54,7 @@ namespace Service.Liquidity.DwhDataJob.Jobs
                 _logger.LogInformation($"PersistExternalBalances start at {DateTime.UtcNow}");
                 
                 var externalExchanges = await _externalMarketsGrpc.GetExternalMarketListAsync();
-                var exchangesList = externalExchanges.Data.List;
+                var exchangesList = externalExchanges.Data.List ?? new List<string>();
                 var iterationTime = DateTime.UtcNow;
                 
                 _logger.LogInformation("PersistExternalBalances find exchanges: {exchangesJson}.", 
