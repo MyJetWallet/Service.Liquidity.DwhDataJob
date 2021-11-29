@@ -16,7 +16,7 @@ namespace Service.Liquidity.DwhDataJob.SubscriberHandlers
         private readonly ILogger<LiquidityConvertorSwapHandler> _logger;
         private readonly CommissionDashboardEngine _commissionDashboardEngine;
         
-        public LiquidityConvertorSwapHandler(ISubscriber<IReadOnlyList<SwapMessage>> swapSubscriber, 
+        public LiquidityConvertorSwapHandler(ISubscriber<SwapMessage> swapSubscriber, 
             ILogger<LiquidityConvertorSwapHandler> logger, 
             CommissionDashboardEngine commissionDashboardEngine)
         {
@@ -25,35 +25,32 @@ namespace Service.Liquidity.DwhDataJob.SubscriberHandlers
             swapSubscriber.Subscribe(HandleSwapUpdates);
         }
 
-        private async ValueTask HandleSwapUpdates(IReadOnlyList<SwapMessage> events)
+        private async ValueTask HandleSwapUpdates(SwapMessage swapMessage)
         {
-            using var activity = MyTelemetry.StartActivity("Handle convertor events")?.AddTag("count-events", events.Count);
+            using var activity = MyTelemetry.StartActivity("Handle swap messsge");
             try
             {
-                foreach (var swapMessage in events)
-                {
-                    var messageId = swapMessage.Id;
-                    var dashboardSnapshot = _commissionDashboardEngine.GetTodayDashboardSnapshot();
-                    var lastBalanceByAsset = dashboardSnapshot
-                        .Where(e => e.Asset == swapMessage.DifferenceAsset)
-                        .OrderByDescending(e => e.LastUpdateDate)
-                        .FirstOrDefault();
+                var messageId = swapMessage.Id;
+                var dashboardSnapshot = _commissionDashboardEngine.GetTodayDashboardSnapshot();
+                var lastBalanceByAsset = dashboardSnapshot
+                    .Where(e => e.Asset == swapMessage.DifferenceAsset)
+                    .OrderByDescending(e => e.LastUpdateDate)
+                    .FirstOrDefault();
 
-                    if (lastBalanceByAsset == null ||
-                        lastBalanceByAsset.LastMessageId != messageId)
-                    {
-                        await _commissionDashboardEngine.UpdateDashboard(swapMessage, messageId);
-                    }
-                    else
-                    {
-                        _logger.LogError($"LiquidityConvertorSwapHandler handle duplicate message. Id = {messageId}");
-                    }
+                if (lastBalanceByAsset == null ||
+                    lastBalanceByAsset.LastMessageId != messageId)
+                {
+                    await _commissionDashboardEngine.UpdateDashboard(swapMessage, messageId);
+                }
+                else
+                {
+                    _logger.LogError($"LiquidityConvertorSwapHandler handle duplicate message. Id = {messageId}");
                 }
             }
             catch (Exception ex)
             {
                 ex.FailActivity();
-                events.AddToActivityAsJsonTag("convertor events");
+                swapMessage.AddToActivityAsJsonTag("mesage");
                 throw;
             }
         }
