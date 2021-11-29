@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Postgres;
 using Service.Liquidity.DwhDataJob.Domain.Models;
 using Service.Liquidity.DwhDataJob.Postgres.Models;
@@ -17,14 +15,12 @@ namespace Service.Liquidity.DwhDataJob.Postgres
         
         private const string MarketPriceTableName = "marketprice";
         private const string ConvertIndexPriceTableName = "convertprice";
-        private const string BalanceDashboardTableName = "balancedashboard";
         private const string CommissionDashboardTableName = "commissiondashboard";
         private const string ExternalBalanceTableName = "externalbalance";
         
         private DbSet<MarketPriceEntity> MarketPriceCollection { get; set; }
         private DbSet<ConvertIndexPriceEntity> ConvertIndexPriceCollection { get; set; }
         
-        private DbSet<BalanceDashboard> BalanceDashboardCollection { get; set; }
         private DbSet<CommissionDashboard> CommissionDashboardCollection { get; set; }
         private DbSet<ExternalBalanceEntity> ExternalBalanceCollection { get; set; }
         
@@ -38,7 +34,6 @@ namespace Service.Liquidity.DwhDataJob.Postgres
 
             SetMarketPriceEntity(modelBuilder);
             SetConvertIndexPriceEntity(modelBuilder);
-            SetBalanceDashboardEntity(modelBuilder);
             SetCommissionDashboardEntity(modelBuilder);
             SetExternalBalanceEntity(modelBuilder);
 
@@ -53,9 +48,6 @@ namespace Service.Liquidity.DwhDataJob.Postgres
             modelBuilder.Entity<ExternalBalanceEntity>().HasKey(e => e.Id);
             
             modelBuilder.Entity<ExternalBalanceEntity>().Property(e => e.Asset).HasMaxLength(64);
-            modelBuilder.Entity<ExternalBalanceEntity>().Property(e => e.BalanceDate);
-            modelBuilder.Entity<ExternalBalanceEntity>().Property(e => e.LastUpdateDate);
-            modelBuilder.Entity<ExternalBalanceEntity>().Property(e => e.Balance);
             modelBuilder.Entity<ExternalBalanceEntity>().Property(e => e.Exchange).HasMaxLength(64);
             
             modelBuilder.Entity<ExternalBalanceEntity>().HasIndex(e => new {e.Exchange, e.Asset, e.BalanceDate}).IsUnique();
@@ -72,30 +64,12 @@ namespace Service.Liquidity.DwhDataJob.Postgres
             modelBuilder.Entity<CommissionDashboard>().HasKey(e => e.Id);
             
             modelBuilder.Entity<CommissionDashboard>().Property(e => e.Asset).HasMaxLength(64);
-            modelBuilder.Entity<CommissionDashboard>().Property(e => e.CommissionDate);
-            modelBuilder.Entity<CommissionDashboard>().Property(e => e.LastUpdateDate);
-            modelBuilder.Entity<CommissionDashboard>().Property(e => e.Commission);
             modelBuilder.Entity<CommissionDashboard>().Property(e => e.LastMessageId).HasMaxLength(64);
             
             modelBuilder.Entity<CommissionDashboard>().HasIndex(e => new {e.Asset, e.CommissionDate}).IsUnique();
         }
 
-        private void SetBalanceDashboardEntity(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<BalanceDashboard>().ToTable(BalanceDashboardTableName);
-            
-            modelBuilder.Entity<BalanceDashboard>().Property(e => e.Id).UseIdentityColumn();
-            modelBuilder.Entity<BalanceDashboard>().HasKey(e => e.Id);
-            
-            modelBuilder.Entity<BalanceDashboard>().Property(e => e.Asset).HasMaxLength(64);
-            modelBuilder.Entity<BalanceDashboard>().Property(e => e.BalanceDate);
-            modelBuilder.Entity<BalanceDashboard>().Property(e => e.LastUpdateDate);
-            modelBuilder.Entity<BalanceDashboard>().Property(e => e.ClientBalance);
-            modelBuilder.Entity<BalanceDashboard>().Property(e => e.BrokerBalance);
-            modelBuilder.Entity<BalanceDashboard>().Property(e => e.LastMessageId);
-            
-            modelBuilder.Entity<BalanceDashboard>().HasIndex(e => new {e.Asset, e.BalanceDate}).IsUnique();
-        }
+        
 
         private void SetConvertIndexPriceEntity(ModelBuilder modelBuilder)
         {
@@ -106,8 +80,6 @@ namespace Service.Liquidity.DwhDataJob.Postgres
             
             modelBuilder.Entity<ConvertIndexPriceEntity>().Property(e => e.BaseAsset).HasMaxLength(64);
             modelBuilder.Entity<ConvertIndexPriceEntity>().Property(e => e.QuotedAsset).HasMaxLength(64);
-            modelBuilder.Entity<ConvertIndexPriceEntity>().Property(e => e.Price);
-            modelBuilder.Entity<ConvertIndexPriceEntity>().Property(e => e.UpdateDate);
             modelBuilder.Entity<ConvertIndexPriceEntity>().Property(e => e.Error).HasMaxLength(256);
             
             modelBuilder.Entity<ConvertIndexPriceEntity>().HasIndex(e => new {e.BaseAsset, e.QuotedAsset}).IsUnique();
@@ -124,9 +96,6 @@ namespace Service.Liquidity.DwhDataJob.Postgres
             
             modelBuilder.Entity<MarketPriceEntity>().Property(e => e.BrokerId).HasMaxLength(64);
             modelBuilder.Entity<MarketPriceEntity>().Property(e => e.InstrumentSymbol).HasMaxLength(64);
-            modelBuilder.Entity<MarketPriceEntity>().Property(e => e.DateTime);
-            modelBuilder.Entity<MarketPriceEntity>().Property(e => e.Price);
-            modelBuilder.Entity<MarketPriceEntity>().Property(e => e.InstrumentStatus);
             modelBuilder.Entity<MarketPriceEntity>().Property(e => e.Source).HasMaxLength(64);
             modelBuilder.Entity<MarketPriceEntity>().Property(e => e.SourceMarket).HasMaxLength(64);
             
@@ -150,40 +119,7 @@ namespace Service.Liquidity.DwhDataJob.Postgres
                 .On(e => new {e.BaseAsset, e.QuotedAsset})
                 .RunAsync();
         }
-        
-        public async Task ExecBalanceDashboardMigrationAsync(ILogger logger)
-        {
-            try
-            {
-                var path = Path.Combine(Environment.CurrentDirectory, @"Scripts/", "BalanceDashboardMigration.sql");
-                using var script = new StreamReader(path);
-                var scriptBody = await script.ReadToEndAsync();
-                logger.LogInformation($"ExecBalanceDashboardMigrationAsync start at: {DateTime.UtcNow}.");
-                await Database.ExecuteSqlRawAsync(scriptBody);
-                logger.LogInformation($"ExecBalanceDashboardMigrationAsync finish at: {DateTime.UtcNow}.");
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, ex.Message);
-            }
-        }
 
-        public List<BalanceDashboard> GetBalanceDashboardList(DateTime balanceDate)
-        {
-            var dashboardList = BalanceDashboardCollection
-                .Where(e => e.BalanceDate >= balanceDate.Date.AddDays(-1))
-                .ToList();
-            return dashboardList;
-        }
-        
-        public async Task UpsertBalanceDashboard(IEnumerable<BalanceDashboard> dashboardList)
-        {
-            await BalanceDashboardCollection
-                .UpsertRange(dashboardList)
-                .On(e => new {e.Asset, e.BalanceDate})
-                .RunAsync();
-        }
-        
         public List<CommissionDashboard> GetCommissionDashboardList(DateTime commissionDate)
         {
             var dashboardList = CommissionDashboardCollection

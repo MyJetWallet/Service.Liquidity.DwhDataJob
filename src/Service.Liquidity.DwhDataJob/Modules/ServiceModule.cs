@@ -16,12 +16,6 @@ namespace Service.Liquidity.DwhDataJob.Modules
                 .SingleInstance();
             
             builder
-                .RegisterType<BalanceDashboardEngine>()
-                .As<IStartable>()
-                .AsSelf()
-                .AutoActivate()
-                .SingleInstance();
-            builder
                 .RegisterType<CommissionDashboardEngine>()
                 .As<IStartable>()
                 .AsSelf()
@@ -41,11 +35,7 @@ namespace Service.Liquidity.DwhDataJob.Modules
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
-            builder
-                .RegisterType<BalanceDashboardPersistJob>()
-                .As<IStartable>()
-                .AutoActivate()
-                .SingleInstance();
+           
             builder
                 .RegisterType<CommissionDashboardPersistJob>()
                 .As<IStartable>()
@@ -57,11 +47,6 @@ namespace Service.Liquidity.DwhDataJob.Modules
                 .AutoActivate()
                 .SingleInstance();
             
-            builder
-                .RegisterType<BalanceDashboardUpdateHandler>()
-                .As<IStartable>()
-                .AutoActivate()
-                .SingleInstance();
             builder
                 .RegisterType<LiquidityConvertorSwapHandler>()
                 .As<IStartable>()
