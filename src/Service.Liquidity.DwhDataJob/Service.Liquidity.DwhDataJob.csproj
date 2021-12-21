@@ -20,7 +20,7 @@
     <PackageReference Include="MyJetWallet.Sdk.Service" Version="2.1.5" />
     <PackageReference Include="MyJetWallet.Service.Balances.Client" Version="2.1.0" />
     <PackageReference Include="MyJetWallet.Service.Bitgo.Watcher.Client" Version="1.1.0" />
-    <PackageReference Include="MyJetWallet.Service.ClientWallets.Client" Version="1.4.0" />
+    <PackageReference Include="MyJetWallet.Service.ClientWallets.Client" Version="1.4.1" />
     <PackageReference Include="MyJetWallet.Service.IndexPrices.Client" Version="1.6.0" />
     <PackageReference Include="MyJetWallet.Service.Liquidity.Converter.Client" Version="1.2.0" />
     <PackageReference Include="MyJetWallet.Service.Liquidity.InternalWallets.Client" Version="1.1.0" />
