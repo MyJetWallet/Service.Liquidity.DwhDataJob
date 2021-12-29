@@ -11,7 +11,7 @@
       </PackageReference>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.1" />
       <PackageReference Include="MyJetWallet.Sdk.Postgres" Version="2.1.1" />
-      <PackageReference Include="MyJetWallet.Service.IndexPrices.Client" Version="1.6.0" />
+      <PackageReference Include="MyJetWallet.Service.IndexPrices.Client" Version="1.6.1" />
     </ItemGroup>
 
     <ItemGroup>
