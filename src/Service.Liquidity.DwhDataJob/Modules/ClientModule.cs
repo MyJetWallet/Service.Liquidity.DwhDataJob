@@ -16,7 +16,7 @@ namespace Service.Liquidity.DwhDataJob.Modules
         protected override void Load(ContainerBuilder builder)
         {
             var myNoSqlClient = builder
-                .CreateNoSqlClient(Program.ReloadedSettings(e => e.MyNoSqlReaderHostPort));
+                .CreateNoSqlClient(Program.Settings.MyNoSqlReaderHostPort, Program.LogFactory);
             builder.RegisterCurrentPricesClient(myNoSqlClient);
             builder.RegisterConvertIndexPricesClient(myNoSqlClient);
             builder.RegisterBitgoSettingsReader(myNoSqlClient);
